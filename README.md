@@ -6,3 +6,7 @@
 • ✅ 处理目标遮挡、短暂消失后的重新匹配
 • ✅ 可视化跟踪结果（支持窗口显示）
 • ✅ 兼容 YOLOv5/YOLOv8 模型，可灵活切换
+<figure>
+    <img src="./images/img_1.png" alt="车辆识别" width="80%">
+    <figcaption>图1：城市道路场景（9辆汽车，无遮挡，跟踪ID稳定）</figcaption>
+</figure>
