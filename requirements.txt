@@ -1,0 +1,6 @@
+ultralytics>=8.0.0    # YOLO 目标检测库
+numpy>=1.24.0         # 数值计算（避免 1.25+ 标量转换警告）
+opencv-python>=4.8.0  # 图像读取与显示
+filterpy>=1.4.5       # 卡尔曼滤波实现
+scipy>=1.10.0         # 匈牙利算法（linear_sum_assignment）
+matplotlib>=3.7.0     # 可选：轨迹可视化
