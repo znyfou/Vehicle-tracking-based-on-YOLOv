@@ -186,44 +186,49 @@ class KFtracker:
         ry = X[1] + X[3]/2
         return np.array([lx, ly, rx, ry])
 
-model = YOLO("yolov5su.pt")
-video = cv2.VideoCapture("../data/test_1.mp4")
-tracks = []
-COLORS = np.random.randint(0, 255, size=(200, 3), dtype='uint8')
-fps = 1
-while True:
-    ret, frame = video.read()
-    if ret or frame is None==0:
-        break
 
-    t1 = time.time()
-    results = model.predict(frame)
-    xyxys = [res.boxes.xyxy[0] for res in results[0]]
-    infors = [[float(xyxys[idx][0]), float(xyxys[idx][1]), float(xyxys[idx][2]), float(xyxys[idx][3]),
-               int(results[0][idx].boxes.cls), float(results[0][idx].boxes.conf)] for idx in range(len(results[0]))]
-    
+if __name__ == '__main__':
+    model = YOLO("yolov5su.pt")
+    # video = cv2.VideoCapture(0) #摄像头输入
+    video = cv2.VideoCapture("../data/test_1.mp4")
+    tracks = []
+    COLORS = np.random.randint(0, 255, size=(200, 3), dtype='uint8')
+    fps = 1
 
-    tracks = KFtracker.track(infors, tracks)
-    count_car = 0
-    for t in tracks:
-        if not t.hit:
-            continue
-        count_car += 1
-        pred = t.predict().reshape(4)
+    while True:
+        ret, frame = video.read()
+        if ret is None or frame is None:
+            break
 
-        color = [int(c) for c in COLORS[t.id % len(COLORS)]]
-        cv2.rectangle(frame, (int(pred[0]), int(pred[1])), (int(pred[2]), int(pred[3])), color, 2)
-        cv2.putText(frame, f"{t.id} {model.names[t.cls]} {t.conf:.2f}", (int(pred[0]), int(pred[1]) - 10), 0, 5e-1, color, 1)
-    cv2.putText(frame, f"car: {count_car}", (0, 40), 0, 5e-1, (255, 0, 0), 1)
-    cv2.putText(frame, f"FPS: {fps:.2f}", (int(0), int(20)), 0, 5e-1, (0,255,0), 2)
+        t1 = time.time()
+        results = model.predict(frame)
+        xyxys = [res.boxes.xyxy[0] for res in results[0]]
+        infors = [[float(xyxys[idx][0]), float(xyxys[idx][1]), float(xyxys[idx][2]), float(xyxys[idx][3]),
+                   int(results[0][idx].boxes.cls), float(results[0][idx].boxes.conf)] for idx in range(len(results[0]))]
 
-    fps = (fps + (1. / (time.time() - t1))) / 2
-    cv2.imshow('frame', frame)
-    key = cv2.waitKey(1)
-    if key == ord('q'):
-        break
-    elif key == ord('c'):
-        cv2.waitKey(0)
+        tracks = KFtracker.track(infors, tracks)
+        count_car = 0
+        for t in tracks:
+            if not t.hit:
+                continue
+            count_car += 1
+            pred = t.predict().reshape(4)
 
-video.release()
-cv2.destroyAllWindows()
+            color = [int(c) for c in COLORS[t.id % len(COLORS)]]
+            cv2.rectangle(frame, (int(pred[0]), int(pred[1])), (int(pred[2]), int(pred[3])), color, 2)
+            cv2.putText(frame, f"{t.id} {model.names[t.cls]} {t.conf:.2f}", (int(pred[0]), int(pred[1]) - 10), 0, 5e-1,
+                        color, 1)
+        cv2.putText(frame, f"cur car: {count_car}", (0, 40), 0, 5e-1, (255, 0, 0), 1)
+        cv2.putText(frame, f"FPS: {fps:.2f}", (int(0), int(20)), 0, 5e-1, (0, 255, 0), 2)
+
+        fps = (fps + (1. / (time.time() - t1))) / 2
+        cv2.imshow('frame', frame)
+
+        key = cv2.waitKey(1)
+        if key == ord('q'):
+            break
+        elif key == ord('c'):
+            cv2.waitKey(0)
+
+    video.release()
+    cv2.destroyAllWindows()
